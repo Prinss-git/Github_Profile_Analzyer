@@ -78,11 +78,16 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-app.listen(PORT, () => {
-  console.log(`GitHub Profile Analyzer API running on http://localhost:${PORT}`);
-  if (process.env.GITHUB_TOKEN) {
-    console.log('GitHub token loaded — higher rate limits active.');
-  } else {
-    console.log('No GITHUB_TOKEN found — using unauthenticated rate limits (60 req/hr).');
-  }
-});
+// In serverless (Vercel) the file is imported, not run directly — skip listen().
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`GitHub Profile Analyzer API running on http://localhost:${PORT}`);
+    if (process.env.GITHUB_TOKEN) {
+      console.log('GitHub token loaded — higher rate limits active.');
+    } else {
+      console.log('No GITHUB_TOKEN found — using unauthenticated rate limits (60 req/hr).');
+    }
+  });
+}
+
+module.exports = app;
