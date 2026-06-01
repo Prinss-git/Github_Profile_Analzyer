@@ -1,6 +1,6 @@
-const https = require('https');
+import https from 'https';
 
-function githubRequest(path) {
+export function githubRequest(path) {
   return new Promise((resolve, reject) => {
     const options = {
       hostname: 'api.github.com',
@@ -28,7 +28,7 @@ function githubRequest(path) {
   });
 }
 
-function handleError(res, status, headers) {
+export function handleError(res, status, headers) {
   if (status === 404) {
     return res.status(404).json({ error: 'User not found on GitHub.' });
   }
@@ -36,7 +36,7 @@ function handleError(res, status, headers) {
     const reset = headers['x-ratelimit-reset'];
     const time = reset ? new Date(reset * 1000).toLocaleTimeString() : 'soon';
     return res.status(403).json({
-      error: `GitHub API rate limit exceeded. Resets at ${time}. Add a GITHUB_TOKEN to increase limits.`,
+      error: `GitHub API rate limit exceeded. Resets at ${time}.`,
     });
   }
   if (status === 401) {
@@ -44,5 +44,3 @@ function handleError(res, status, headers) {
   }
   return res.status(status).json({ error: `GitHub API error (${status}).` });
 }
-
-module.exports = { githubRequest, handleError };

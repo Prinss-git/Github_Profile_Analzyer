@@ -1,6 +1,6 @@
-const { githubRequest, handleError } = require('../_github');
+import { githubRequest, handleError } from '../_github.js';
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   const { username } = req.query;
   try {
     const { status, headers, body } = await githubRequest(
@@ -11,4 +11,4 @@ module.exports = async function handler(req, res) {
   } catch (err) {
     res.status(500).json({ error: 'Failed to reach GitHub API.' });
   }
-};
+}
