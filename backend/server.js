@@ -43,7 +43,7 @@ function handleGitHubError(err, res) {
   return res.status(500).json({ error: 'Failed to reach GitHub API. Check your internet connection.' });
 }
 
-app.get('/api/user/:username', async (req, res) => {
+app.get('/user/:username', async (req, res) => {
   try {
     const { data } = await githubAxios.get(`/users/${req.params.username}`);
     res.json(data);
@@ -52,7 +52,7 @@ app.get('/api/user/:username', async (req, res) => {
   }
 });
 
-app.get('/api/repos/:username', async (req, res) => {
+app.get('/repos/:username', async (req, res) => {
   try {
     const { data } = await githubAxios.get(`/users/${req.params.username}/repos`, {
       params: { per_page: 100, sort: 'updated' },
@@ -63,7 +63,7 @@ app.get('/api/repos/:username', async (req, res) => {
   }
 });
 
-app.get('/api/events/:username', async (req, res) => {
+app.get('/events/:username', async (req, res) => {
   try {
     const { data } = await githubAxios.get(`/users/${req.params.username}/events/public`, {
       params: { per_page: 100 },
