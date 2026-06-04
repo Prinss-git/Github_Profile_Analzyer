@@ -412,7 +412,14 @@ img { display: block; }
   display: flex;
   flex-direction: column;
   gap: 7px;
+  max-height: 220px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-hi) transparent;
 }
+.lang-list::-webkit-scrollbar { width: 4px; }
+.lang-list::-webkit-scrollbar-track { background: transparent; }
+.lang-list::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 2px; }
 
 .lang-item {
   display: flex;

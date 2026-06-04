@@ -4,29 +4,42 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const PALETTE = [
-  '#58a6ff', '#3fb950', '#f78166', '#d2a8ff', '#ffa657',
-  '#79c0ff', '#aaaaaa',
+  '#3b82f6', '#22c55e', '#f59e0b', '#a78bfa', '#f87171',
+  '#06b6d4', '#ec4899', '#84cc16', '#fb923c', '#e879f9',
+  '#34d399', '#fbbf24', '#60a5fa', '#f472b6', '#4ade80',
+  '#818cf8', '#fb7185', '#38bdf8', '#a3e635', '#c084fc',
 ];
+
+function getColor(index) {
+  return PALETTE[index % PALETTE.length];
+}
 
 export default function LanguageChart({ languages }) {
   if (!languages || languages.length === 0) {
     return (
       <div className="card chart-card">
-        <h3 className="card-title">Top Languages</h3>
+        <h3 className="card-title">Languages</h3>
         <p className="empty-state">No language data available.</p>
       </div>
     );
   }
 
+  // Doughnut shows top 8, list shows all
+  const chartLangs = languages.slice(0, 8);
+  const remainingBytes = languages.slice(8).reduce((sum, l) => sum + l.bytes, 0);
+  const chartData = remainingBytes > 0
+    ? [...chartLangs, { name: 'Other', bytes: remainingBytes, percent: languages.slice(8).reduce((s, l) => s + parseFloat(l.percent), 0).toFixed(1) }]
+    : chartLangs;
+
   const data = {
-    labels: languages.map((l) => l.name),
+    labels: chartData.map((l) => l.name),
     datasets: [
       {
-        data: languages.map((l) => l.bytes),
-        backgroundColor: PALETTE.slice(0, languages.length),
-        borderColor: '#0d1117',
-        borderWidth: 3,
-        hoverOffset: 8,
+        data: chartData.map((l) => l.bytes),
+        backgroundColor: chartData.map((_, i) => getColor(i)),
+        borderColor: '#080a0c',
+        borderWidth: 2,
+        hoverOffset: 6,
       },
     ],
   };
@@ -34,30 +47,21 @@ export default function LanguageChart({ languages }) {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
-    cutout: '65%',
+    cutout: '68%',
     plugins: {
-      legend: {
-        position: 'bottom',
-        labels: {
-          color: '#c9d1d9',
-          padding: 16,
-          font: { family: 'Inter, system-ui, sans-serif', size: 13 },
-          boxWidth: 12,
-          boxHeight: 12,
-        },
-      },
+      legend: { display: false },
       tooltip: {
         callbacks: {
           label(ctx) {
-            const lang = languages[ctx.dataIndex];
+            const lang = chartData[ctx.dataIndex];
             return ` ${lang.name}: ${lang.percent}%`;
           },
         },
-        backgroundColor: '#161b22',
-        borderColor: '#30363d',
+        backgroundColor: '#0e1115',
+        borderColor: '#1e2530',
         borderWidth: 1,
-        titleColor: '#c9d1d9',
-        bodyColor: '#8b949e',
+        titleColor: '#f0f4f8',
+        bodyColor: '#7a8899',
         padding: 10,
       },
     },
@@ -65,14 +69,14 @@ export default function LanguageChart({ languages }) {
 
   return (
     <div className="card chart-card">
-      <h3 className="card-title">Top Languages</h3>
+      <h3 className="card-title">Languages</h3>
       <div className="doughnut-wrapper">
         <Doughnut data={data} options={options} />
       </div>
       <ul className="lang-list">
         {languages.map((lang, i) => (
           <li key={lang.name} className="lang-item">
-            <span className="lang-dot" style={{ background: PALETTE[i] }} />
+            <span className="lang-dot" style={{ background: getColor(i) }} />
             <span className="lang-name">{lang.name}</span>
             <span className="lang-percent">{lang.percent}%</span>
           </li>

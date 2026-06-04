@@ -25,11 +25,8 @@ function aggregateLanguages(repos) {
     }
   }
   const sorted = Object.entries(totals).sort((a, b) => b[1] - a[1]);
-  const top6 = sorted.slice(0, 6);
-  const otherTotal = sorted.slice(6).reduce((sum, [, v]) => sum + v, 0);
-  if (otherTotal > 0) top6.push(['Other', otherTotal]);
-  const total = top6.reduce((sum, [, v]) => sum + v, 0);
-  return top6.map(([name, bytes]) => ({
+  const total = sorted.reduce((sum, [, v]) => sum + v, 0);
+  return sorted.map(([name, bytes]) => ({
     name,
     bytes,
     percent: ((bytes / total) * 100).toFixed(1),
