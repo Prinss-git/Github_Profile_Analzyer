@@ -150,6 +150,7 @@ export default function App() {
             GitHub REST API
           </a>
         </p>
+        <p className="footer-credit">Made by Prince Christian Parnada</p>
       </footer>
     </div>
   );

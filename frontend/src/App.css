@@ -650,6 +650,7 @@ img { display: block; }
 }
 .app-footer a { color: var(--text-muted); }
 .app-footer a:hover { color: var(--accent-blue); }
+.footer-credit { margin-top: 6px; color: var(--text-muted); font-size: 12px; }
 
 /* ─────────────────────────────────────────────
    Animations
