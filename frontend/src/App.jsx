@@ -17,21 +17,6 @@ async function apiFetch(path) {
   return res.json();
 }
 
-function aggregateLanguages(repos) {
-  const totals = {};
-  for (const repo of repos) {
-    if (repo.language) {
-      totals[repo.language] = (totals[repo.language] || 0) + (repo.size || 1);
-    }
-  }
-  const sorted = Object.entries(totals).sort((a, b) => b[1] - a[1]);
-  const total = sorted.reduce((sum, [, v]) => sum + v, 0);
-  return sorted.map(([name, bytes]) => ({
-    name,
-    bytes,
-    percent: ((bytes / total) * 100).toFixed(1),
-  }));
-}
 
 function formatCommitBuckets(buckets) {
   const labels = Object.keys(buckets).map((k) => {
@@ -52,13 +37,13 @@ export default function App() {
     setProfileData(null);
 
     try {
-      const [user, repos, commitBuckets] = await Promise.all([
+      const [user, repos, languages, commitBuckets] = await Promise.all([
         apiFetch(`/api/user/${username}`),
         apiFetch(`/api/repos/${username}`),
+        apiFetch(`/api/languages/${username}`),
         apiFetch(`/api/commits/${username}`),
       ]);
 
-      const languages = aggregateLanguages(repos);
       const commitActivity = formatCommitBuckets(commitBuckets);
 
       const topRepos = [...repos]
