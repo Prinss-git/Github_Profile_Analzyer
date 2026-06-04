@@ -110,7 +110,7 @@ export default function App() {
 
       <main className="app-main">
         <section className="hero">
-          <h1>Explore Any GitHub Profile</h1>
+          <h1>Explore Any <span>GitHub</span> Profile</h1>
           <p>Visualize languages, commit activity, top repositories, and more.</p>
           <SearchBar onSearch={handleSearch} loading={loading} />
         </section>
