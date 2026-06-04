@@ -33,27 +33,12 @@ function aggregateLanguages(repos) {
   }));
 }
 
-function aggregateCommits(events) {
-  const now = new Date();
-  const months = {};
-  for (let i = 11; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    months[key] = 0;
-  }
-  for (const event of events) {
-    if (event.type !== 'PushEvent') continue;
-    const date = new Date(event.created_at);
-    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    if (key in months) {
-      months[key] += event.payload?.commits?.length || 1;
-    }
-  }
-  const labels = Object.keys(months).map((k) => {
+function formatCommitBuckets(buckets) {
+  const labels = Object.keys(buckets).map((k) => {
     const [year, month] = k.split('-');
     return new Date(year, month - 1, 1).toLocaleString('default', { month: 'short', year: '2-digit' });
   });
-  return { labels, data: Object.values(months) };
+  return { labels, data: Object.values(buckets) };
 }
 
 export default function App() {
@@ -67,14 +52,14 @@ export default function App() {
     setProfileData(null);
 
     try {
-      const [user, repos, events] = await Promise.all([
+      const [user, repos, commitBuckets] = await Promise.all([
         apiFetch(`/api/user/${username}`),
         apiFetch(`/api/repos/${username}`),
-        apiFetch(`/api/events/${username}`),
+        apiFetch(`/api/commits/${username}`),
       ]);
 
       const languages = aggregateLanguages(repos);
-      const commitActivity = aggregateCommits(events);
+      const commitActivity = formatCommitBuckets(commitBuckets);
 
       const topRepos = [...repos]
         .sort((a, b) => b.stargazers_count - a.stargazers_count)
