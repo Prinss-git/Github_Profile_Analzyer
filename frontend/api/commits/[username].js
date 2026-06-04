@@ -11,11 +11,28 @@ function buildMonthBuckets() {
   return buckets;
 }
 
+async function fetchAllCommits(username, repoName, since) {
+  const commits = [];
+  let page = 1;
+  while (page <= 5) {
+    const res = await githubRequest(
+      `/repos/${username}/${repoName}/commits?author=${username}&since=${since}&per_page=100&page=${page}`
+    );
+    if (res.status !== 200) break;
+    let batch;
+    try { batch = JSON.parse(res.body); } catch { break; }
+    if (!Array.isArray(batch) || batch.length === 0) break;
+    commits.push(...batch);
+    if (batch.length < 100) break;
+    page++;
+  }
+  return commits;
+}
+
 export default async function handler(req, res) {
   const { username } = req.query;
 
   try {
-    // Fetch repos
     const reposRes = await githubRequest(`/users/${username}/repos?per_page=100&sort=pushed`);
     if (reposRes.status !== 200) return handleError(res, reposRes.status, reposRes.headers);
     const repos = JSON.parse(reposRes.body);
@@ -24,28 +41,15 @@ export default async function handler(req, res) {
     since.setFullYear(since.getFullYear() - 1);
     const sinceISO = since.toISOString();
 
-    // Top 30 repos by push date (already sorted), fetch commits in parallel
-    const top = repos.slice(0, 30);
-
     const results = await Promise.allSettled(
-      top.map((repo) =>
-        githubRequest(
-          `/repos/${username}/${repo.name}/commits?author=${username}&since=${sinceISO}&per_page=100`
-        )
-      )
+      repos.map((repo) => fetchAllCommits(username, repo.name, sinceISO))
     );
 
     const buckets = buildMonthBuckets();
 
     for (const result of results) {
       if (result.status !== 'fulfilled') continue;
-      const { status, body } = result.value;
-      if (status !== 200) continue;
-      let commits;
-      try { commits = JSON.parse(body); } catch { continue; }
-      if (!Array.isArray(commits)) continue;
-
-      for (const commit of commits) {
+      for (const commit of result.value) {
         const dateStr = commit.commit?.author?.date || commit.commit?.committer?.date;
         if (!dateStr) continue;
         const d = new Date(dateStr);
@@ -54,7 +58,7 @@ export default async function handler(req, res) {
       }
     }
 
-    res.status(200).json(buckets);
+    res.status(200).json({ buckets, repoCount: repos.length });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch commit data.' });
   }

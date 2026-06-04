@@ -85,7 +85,7 @@ export default function CommitChart({ commitActivity }) {
           <p className="empty-state-overlay">No public push events in the last 12 months.</p>
         </div>
       )}
-      <p className="chart-note">Based on public push events via GitHub Events API</p>
+      <p className="chart-note">Public repositories only — private repo commits are not included</p>
     </div>
   );
 }

@@ -18,7 +18,7 @@ async function apiFetch(path) {
 }
 
 
-function formatCommitBuckets(buckets) {
+function formatCommitBuckets({ buckets }) {
   const labels = Object.keys(buckets).map((k) => {
     const [year, month] = k.split('-');
     return new Date(year, month - 1, 1).toLocaleString('default', { month: 'short', year: '2-digit' });
